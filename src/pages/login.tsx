@@ -11,12 +11,33 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import NextLink from "next/link";
+import { useForm } from "react-hook-form";
+import z from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordInput } from "@/components/ui/password-input";
 import LoginImage from "../../public/assets/login-gif.gif";
 
+const signInFormSchema = z.object({
+  email: z.email("Digite um e-mail válido").nonempty("O e-mail é obrigatório"),
+  password: z
+    .string()
+    .nonempty("A senha é obrigatória")
+    .min(8, "A senha deve ter pelo menos 9 caracteres"),
+});
+
+type SignInFormData = z.infer<typeof signInFormSchema>;
+
 export default function Login() {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(signInFormSchema),
+  });
+
+  function handleSignIn(data: SignInFormData) {
+    console.log(data)
+  }
+
   return (
     <Flex w="100vw" h="100vh">
       <Flex w="50%" bg="#2C73EB" align={"center"} justify="center">
@@ -31,8 +52,8 @@ export default function Login() {
             Se você já é membro, você pode fazer login com seu endereço de
             e-mail e senha.
           </Text>
-          <VStack align="flex-start" gap={6}>
-            <Field.Root required>
+            <VStack align="flex-start" gap={6} as={"form"} onSubmit={handleSubmit(handleSignIn)}>
+            <Field.Root invalid={!!errors.email}>
               <Field.Label color="gray.500">
                 Email <Field.RequiredIndicator />
               </Field.Label>
@@ -41,13 +62,16 @@ export default function Login() {
                 colorPalette="blue"
                 rounded="md"
                 color="black"
+                {...register("email")}
               />
+             <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
             </Field.Root>
-            <Field.Root required>
+            <Field.Root invalid={!!errors.password}>
               <Field.Label color="gray.500">
                 Senha <Field.RequiredIndicator />
               </Field.Label>
-              <PasswordInput colorPalette="blue" rounded="md" color="black" />
+              <PasswordInput  {...register("password")} colorPalette="blue" rounded="md" color="black" />
+               <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
             </Field.Root>
             <Checkbox
               colorPalette="blue"
@@ -57,7 +81,7 @@ export default function Login() {
             >
               Lembre-me
             </Checkbox>
-            <Button colorPalette="blue" rounded="md" w="full">
+            <Button colorPalette="blue" rounded="md" w="full" type="submit">
               Entrar
             </Button>
           </VStack>
