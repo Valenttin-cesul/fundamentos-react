@@ -5,7 +5,7 @@ import {
 export const themeConfig = defineConfig({
   globalCss: {
     "html, body": {
-      backgroundColor: "red"
+      backgroundColor: "white"
     }
   },
   theme: {
